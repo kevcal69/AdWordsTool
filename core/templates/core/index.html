@@ -1,0 +1,155 @@
+<html>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        header {
+            width: 100%;
+            height: 50px;
+            padding: 20px 5%;
+            border-bottom: 1px solid #dedede;
+        }
+        main {
+            width: 100%;
+            height: 50px;
+            padding: 20px 5%;
+        }
+        main input {
+            padding: 10px 5px;
+            width: 200px;
+            outline: None;
+        }
+        main .button-container {
+            margin: 10px 0 20px 0px;
+        }
+        main .button-container button {
+            width: 100px;
+            padding: 5px 5px;
+            background: #eeeeee;
+            outline: None;
+        }
+        main .results-container {
+            margin-top: 20px;
+        }
+        .table {
+            width: 500px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        .row {
+            height: 50px;
+            width: 500px;
+            display: flex;
+            text-align: center;
+        }
+        .col {
+            width: 150px;
+            height: 100%;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+    <body>
+        <header>
+            <h1>AdWords tool</h1>
+        </header>
+        <main>
+            <input type="text" id="keywords" placeholder="Input Keywords">
+            <div class="button-container">
+                <button class="partA">Part A</button>
+                <button class="partB">Part B</button>
+            </div>
+            <hr />
+            <span class="loading hidden">Loading...</span>
+            <div class="results-container">
+                <div class="table">
+
+                </div>
+            </div>
+        </main>
+    </body>
+    <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous">
+    </script>
+    <script>
+        $('.partA').on('click', e => {
+            let keywords = $('#keywords').val().trim()
+            if (!keywords) {
+                return
+            }
+            $('.loading').removeClass('hidden');
+            requestResults({
+                requestType: 0,
+                keywords
+            }).then((response) => {
+                    let { data } = response;
+                    $('.table').empty();
+                    $('.loading').addClass('hidden');
+                    render(data);
+                });
+        });
+
+        $('.partB').on('click', e => {
+            let keywords = $('#keywords').val().trim()
+            if (!keywords) {
+                return
+            }
+            $('.loading').removeClass('hidden');
+            requestResults({
+                requestType: 1,
+                keywords
+            }).then((response) => {
+                let { data } = response;
+                $('.table').empty();
+                $('.loading').addClass('hidden');
+                render(data);
+            });
+        });
+
+        function render(data) {
+            $('.table').append(`
+                <div class="row">
+                    <div class="col">
+                        KEYWORD TEXT
+                    </div>
+                    <div class="col">
+                        SEARCH VOLUME
+                    </div>
+                    <div class="col">
+                        AVERAGE CPC (micro amount)
+                    </div>
+                </div>
+            `);
+            for (var i = 0; i < data.length; i++) {
+                let obj = data[i];
+                $('.table').append(`
+                <div class="row">
+                    <div class="col">
+                        ${obj.KEYWORD_TEXT}
+                    </div>
+                    <div class="col">
+                        ${obj.SEARCH_VOLUME}
+                    </div>
+                    <div class="col">
+                        ${obj.AVERAGE_CPC}
+                    </div>
+                </div>
+                `);
+            }
+        }
+
+
+        function requestResults(payload) {
+            return new Promise((resolve, reject) => {
+                $.get('/get-results', payload, resolve, 'json')
+            })
+
+        }
+    </script>
+</html>
